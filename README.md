@@ -1,28 +1,28 @@
 # DigitFlow — Digit Recognition
 
-纯 Python 桌面应用：鼠标手写数字，实时显示 CNN 特征图、连接动画和 0–9 的输出概率。英文界面，深色背景，青紫色微光。
+A Python desktop application for recognizing handwritten digits as you draw. View live CNN feature maps, animated connections, and prediction probabilities for digits 0–9 in a minimalist English interface with a dark background and cyan and violet accents.
 
 ![Actual application screenshot](artifacts/app-preview.png)
 
-## 启动
+## Run the Application
 
-项目包含训练好的模型。本机开发环境已配置虚拟环境，可在项目目录运行以下命令；首次下载仓库时请先完成下方“新环境安装”。
+The repository includes a trained model. If the project's virtual environment is already configured, run the following command from the project directory. For a fresh checkout, complete **Installation** below first.
 
 ```bash
 .venv/bin/python main.py
 ```
 
-也支持 `.venv/bin/python -m digit_recognition`，或激活环境后使用 `digit-recognition`。
+You can also run `.venv/bin/python -m digit_recognition`, or use `digit-recognition` after activating the virtual environment.
 
-- 鼠标左键拖动：手写一个数字，书写时自动识别。
-- **Clear / Esc**：清空画布及识别结果。
-- **Cmd+Z（macOS）/ Ctrl+Z（Windows、Linux）**：撤销上一笔。
+- **Left-click and drag:** draw a single digit and see predictions update while writing.
+- **Clear / Esc:** clear the canvas and prediction results.
+- **Cmd+Z (macOS) / Ctrl+Z (Windows, Linux):** undo the last stroke.
 
-加载模型后可离线使用。应用不会上传笔迹，也不会在书写时训练。
+Once installed, the application loads the bundled model and works offline. Handwriting is processed locally and is never uploaded. Drawing does not retrain the model.
 
-## 新环境安装
+## Installation
 
-需要 Python 3.11 或以上版本，推荐使用已验证的 Python 3.12。无须浏览器、Node.js 或独立显卡。
+Python 3.11 or later is required; Python 3.12 is recommended and has been tested. A browser, Node.js, and a dedicated GPU are not required.
 
 ```bash
 python3 -m venv .venv
@@ -31,31 +31,31 @@ python -m pip install -e ".[dev]"
 python main.py
 ```
 
-Windows 使用 `.venv\Scripts\activate` 激活环境。只运行应用时可安装 `python -m pip install -e .`。
+On Windows, activate the environment with `.venv\Scripts\activate` in Command Prompt or `.\.venv\Scripts\Activate.ps1` in PowerShell. If you only need to run the application, install it with `python -m pip install -e .` instead of including the development extras.
 
-`pyproject.toml` 声明全部直接依赖，`requirements-lock.txt` 保存本次验证环境的精确版本和传递依赖。兼容环境可按以下方式复现：
+All direct dependencies are declared in `pyproject.toml`. The exact versions and transitive dependencies from the tested environment are recorded in `requirements-lock.txt`. To reproduce those versions on a compatible system:
 
 ```bash
 python -m pip install -r requirements-lock.txt
 python -m pip install --no-deps -e .
 ```
 
-| 依赖 | 用途 |
+| Dependency | Purpose |
 | --- | --- |
-| NumPy | 笔迹裁剪、质心计算、数组变换、激活聚合、特征图颜色映射 |
-| Pillow | 保持宽高比缩放手写图像 |
-| PySide6 | 原生窗口、鼠标输入、自定义绘图、动画和后台线程 |
-| PyTorch | CNN 训练与 CPU 推理 |
-| Torchvision | MNIST 数据加载 |
-| certifi | 训练下载时提供可信 HTTPS CA 证书 |
-| pytest（dev） | 自动化测试；Qt 测试使用 PySide6 自带的 QtTest |
-| setuptools、wheel（build） | Python 包构建与可编辑安装 |
+| NumPy | Handwriting cropping, center-of-mass calculations, array transformations, activation aggregation, and feature-map color mapping |
+| Pillow | Resizing handwriting images while preserving their aspect ratio |
+| PySide6 | Native windows, mouse input, custom drawing, animation, and background threads |
+| PyTorch | CNN training and CPU inference |
+| Torchvision | Loading the MNIST dataset |
+| certifi | Trusted HTTPS CA certificates for dataset downloads during training |
+| pytest (dev) | Automated tests; Qt interaction tests use QtTest bundled with PySide6 |
+| setuptools, wheel (build) | Python package builds and editable installation |
 
-当前验证环境为 macOS arm64 / Python 3.12.7。其他平台的 wheel 可用性可能不同，跨平台安装优先使用 `pyproject.toml` 解析兼容版本。
+The tested environment is **macOS arm64 / Python 3.12.7**. Package wheel availability may differ on other platforms. For installation on another platform, prefer the standard installation command so dependencies can be resolved from `pyproject.toml`.
 
-## 模型与训练
+## Model and Training
 
-`artifacts/mnist_cnn.pt` 是实际训练得到的权重。
+`artifacts/mnist_cnn.pt` contains the trained model weights.
 
 ```text
 28×28 grayscale
@@ -65,66 +65,66 @@ python -m pip install --no-deps -e .
 → Dropout(0.15, training only) → Dense(10)
 ```
 
-预处理裁剪笔迹、缩放到 20×20 范围、补边到 28×28、按质心居中，再按 MNIST 参数归一化。空白输入不产生预测。推理使用 `eval()`、`inference_mode()` 和 Softmax。
+Preprocessing crops the handwriting, fits it within a 20×20 box, pads it to 28×28, centers its mass, and normalizes it using the MNIST parameters. Blank input produces no prediction. Inference uses `eval()`, `inference_mode()`, and Softmax.
 
-本次训练使用随机种子 42、55,000 张训练样本、5,000 张独立验证样本和 6 个 epoch。使用验证集选权重，最后在 10,000 张测试样本上评估：验证准确率 **98.78%**，测试准确率 **98.93%**。记录见 `artifacts/mnist_cnn.json`。这不是鼠标手写准确率的保证，未完成的笔迹也可能得到较高模型概率。
+The bundled model was trained for 6 epochs with random seed 42, using 55,000 training samples and 5,000 separate validation samples. Weights were selected using validation accuracy, then evaluated on 10,000 test samples. Validation accuracy was **98.78%**, and test accuracy was **98.93%**. Training and evaluation records are available in `artifacts/mnist_cnn.json`. These MNIST results do not guarantee the same accuracy on mouse-drawn digits; incomplete strokes may also receive high model probabilities.
 
-重新训练：
+To retrain the model:
 
 ```bash
 python -m digit_recognition.train --epochs 6 --device cpu
 ```
 
-首次训练需联网下载公开 MNIST 数据，之后使用 `data/` 缓存。参数包括 `--device auto|cpu|mps|cuda`、`--seed`、`--batch-size`、`--data-dir`、`--output`。默认替换本地权重，重启应用后生效。
+The first training run requires an internet connection to download the public MNIST dataset. Subsequent runs use the cache in `data/`. Available arguments include `--device auto|cpu|mps|cuda`, `--seed`, `--batch-size`, `--data-dir`, and `--output`. By default, training replaces the local weights. Restart the application to load the updated model.
 
-自定义模型路径：`python main.py --model artifacts/mnist_cnn.pt`。
+To specify a model path: `python main.py --model artifacts/mnist_cnn.pt`.
 
-## 模块划分
+## Project Structure
 
 ```text
-main.py                       # 启动入口
-pyproject.toml                # 运行、开发及构建依赖
-requirements-lock.txt         # 已验证环境的精确版本
+main.py                       # Application entry point
+pyproject.toml                # Runtime, development, and build dependencies
+requirements-lock.txt         # Exact versions from the tested environment
 src/digit_recognition/
-  config.py                   # 路径与共享常量
-  preprocessing.py            # NumPy 预处理，不依赖 Qt
-  model.py                    # CNN 定义，不依赖 Qt
-  train.py                    # 独立训练流程
-  inference.py                # 权重加载与推理快照，不依赖 Qt
-  controller.py               # 后台推理、最新画面调度与清空屏障
-  app.py                      # 参数解析与应用生命周期
+  config.py                   # Paths and shared constants
+  preprocessing.py            # NumPy preprocessing, independent of Qt
+  model.py                    # CNN definition, independent of Qt
+  train.py                    # Standalone training workflow
+  inference.py                # Model loading and inference snapshots, independent of Qt
+  controller.py               # Background inference, latest-frame scheduling, and stale-result handling
+  app.py                      # Argument parsing and application lifecycle
   ui/
-    canvas.py                 # 手写、清空、撤销
-    network.py                # 特征图、聚合节点与连接动画
-    prediction.py             # 概率条与识别结果
-    theme.py                  # 颜色、字体和绘图辅助
-    window.py                 # 界面组合
-artifacts/                    # 权重、实际评估记录和应用截图
-tests/                        # 预处理、推理、调度及 GUI 测试
-scripts/capture_preview.py    # 通过 Qt 鼠标事件生成运行截图
+    canvas.py                 # Handwriting input, clearing, and undo
+    network.py                # Feature maps, grouped nodes, and connection animations
+    prediction.py             # Probability bars and recognition results
+    theme.py                  # Colors, fonts, and drawing helpers
+    window.py                 # UI composition
+artifacts/                    # Trained weights, evaluation records, and application screenshots
+tests/                        # Preprocessing, inference, scheduling, and GUI tests
+scripts/capture_preview.py    # Captures application screenshots using Qt mouse events
 ```
 
-UI 通过信号接收结果，不直接调用模型。后台最多处理一帧，繁忙时仅保留最新画布状态；清空或撤销后不会恢复旧结果。连续书写显示最近完成的结果，避免鼠标不断移动导致推理结果被全部丢弃。推理调度间隔 65 ms，动画定时器 16 ms，实际速度取决于设备。
+The UI receives results through signals instead of calling the model directly. The worker processes one frame at a time and retains only the latest canvas state while busy. Clearing or undoing prevents older results from reappearing. During continuous drawing, the UI displays the most recently completed result so frequent mouse movement does not cause every prediction to be discarded. Inference is scheduled at 65 ms intervals, and the animation timer runs at 16 ms intervals; actual performance depends on the device.
 
-每组特征图固定展示训练时选出的 3 个真实池化输出通道。每个紫色中间节点聚合 8 个隐藏单元，连线强度来自绝对贡献之和，每个输出只显示 3 条主要连线。粒子是数据流示意，不代表真实执行时序。概率数字来自实际 Softmax，概率条进行短暂平滑过渡。主识别数字使用 180 ms 淡入淡出；相同结果不重复触发动画，快速切换时从当前画面衔接，清空时立即移除数字。
+Each feature-map group displays three fixed channels of actual pooling output, selected during training. Each purple hidden node groups eight hidden units. Connection intensity represents the sum of their absolute contributions, and only the three strongest connections are shown for each output. Particles illustrate data flow rather than actual execution timing. Probability values come from Softmax, while the bars use brief smooth transitions. The main predicted digit uses a 180 ms crossfade: repeated results do not restart the animation, rapid changes continue from the current visual state, and clearing removes the digit immediately.
 
-## 验证
+## Verification
 
 ```bash
 python -m pytest -q
 python -m pip check
 ```
 
-测试覆盖空白和边缘笔迹、位置不变性、模型缺失/损坏、概率归一化、特征变化、最新帧调度、清空时旧结果拦截、持续书写、撤销、窗口缩放和线程退出。测试自动使用 Qt offscreen 平台；模型测试使用项目自带权重。
+Tests cover blank and edge-touching handwriting, translation invariance, missing or corrupt models, probability normalization, feature changes, latest-frame scheduling, stale-result rejection after clearing, continuous drawing, undo, window resizing, and thread shutdown. Tests automatically use Qt's offscreen platform. Model tests use the weights included in the repository.
 
-生成真实应用截图（不是概念图）：
+To capture screenshots of the running application rather than concept images:
 
 ```bash
 QT_QPA_PLATFORM=offscreen python scripts/capture_preview.py
 ```
 
-输出到 `artifacts/app-preview.png`，同时生成小窗口及空白画布截图。正常使用时不要设置 `QT_QPA_PLATFORM=offscreen`。
+The script writes `artifacts/app-preview.png` and also captures a smaller window and an empty canvas. Do not set `QT_QPA_PLATFORM=offscreen` when using the application normally.
 
-模型缺失或损坏时，底部显示恢复命令，画布仍可使用。推理错误会显示并记录到终端。训练下载保持 HTTPS 证书验证。
+If the model is missing or corrupt, the footer displays a recovery command and the canvas remains usable. Inference errors are displayed and logged to the terminal. Dataset downloads during training use HTTPS certificate verification.
 
-组件文档：[Qt for Python](https://doc.qt.io/qtforpython-6/)、[PyTorch](https://docs.pytorch.org/)、[MNIST](https://docs.pytorch.org/vision/stable/generated/torchvision.datasets.MNIST.html)、[NumPy](https://numpy.org/doc/stable/)。
+Component documentation: [Qt for Python](https://doc.qt.io/qtforpython-6/), [PyTorch](https://docs.pytorch.org/), [MNIST](https://docs.pytorch.org/vision/stable/generated/torchvision.datasets.MNIST.html), and [NumPy](https://numpy.org/doc/stable/).
