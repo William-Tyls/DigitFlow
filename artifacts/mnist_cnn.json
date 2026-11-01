@@ -1,0 +1,44 @@
+{
+  "dataset": "MNIST",
+  "train_samples": 55000,
+  "validation_samples": 5000,
+  "test_samples": 10000,
+  "seed": 42,
+  "device": "cpu",
+  "epochs": 6,
+  "best_validation_accuracy": 0.9878,
+  "test_accuracy": 0.9893,
+  "history": [
+    {
+      "epoch": 1,
+      "loss": 0.5389260656611864,
+      "validation_accuracy": 0.966
+    },
+    {
+      "epoch": 2,
+      "loss": 0.16096697373445643,
+      "validation_accuracy": 0.978
+    },
+    {
+      "epoch": 3,
+      "loss": 0.1203057401402052,
+      "validation_accuracy": 0.982
+    },
+    {
+      "epoch": 4,
+      "loss": 0.10014215777086657,
+      "validation_accuracy": 0.986
+    },
+    {
+      "epoch": 5,
+      "loss": 0.0899328637088454,
+      "validation_accuracy": 0.9866
+    },
+    {
+      "epoch": 6,
+      "loss": 0.08397663156826829,
+      "validation_accuracy": 0.9878
+    }
+  ],
+  "training_seconds": 46.38
+}
